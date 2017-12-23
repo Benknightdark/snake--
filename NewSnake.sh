@@ -244,7 +244,13 @@ print_game_start()
         done
     done
 }
-
+StartGameMenu(){
+     trap 'snake_exit;' SIGTERM SIGINT; 
+    stty -echo;                               #取消回顯
+    tput civis;                               #隱藏光標
+    tput smcup; clear;                        #保存螢幕並清除紀錄
+    print_game_start;                         #開始遊戲 
+}
 game_main() 
 {
 
@@ -252,19 +258,28 @@ if [ $(id -u) -eq 0 ]; then
 
     read -p '申請遊戲帳號請按1，登入遊戲請按2：' Option
     if [ $Option -eq 1 ]; then
-    read -p "輸入申請遊戲帳號 : " username
-	read -s -p "輸入申請遊戲密碼 : " password
-	egrep "^$username" /etc/passwd >/dev/null
-	if [ $? -eq 0 ]; then
-		echo "$username 此帳號已存在!"
-		exit 1
-	else
-		pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
-		useradd -m -p $pass $username
-		[ $? -eq 0 ] && echo "User has been added to system!" || echo "Failed to add a user!"
-	fi
+        read -p "輸入申請遊戲帳號 : " username
+	    read -s -p "輸入申請遊戲密碼 : " password
+	    egrep "^$username" /etc/passwd >/dev/null
+        if [ $? -eq 0 ]; then
+            echo "$username 此帳號已存在!"
+            exit 1
+        else
+            pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
+            useradd -m -p $pass $username
+            [ $? -eq 0 ] && echo "User has been added to system!" || echo "Failed to add a user!"
+             exit 1
+        fi
+        StartGameMenu
     else
-    return;
+    read -p "輸入遊戲登入帳號 : " username
+	read -s -p "輸入遊戲登入密碼 : " password
+    if [ `id -u $username 2>/dev/null || echo -1` -ge 0 ]; then 
+        StartGameMenu
+        else
+            echo '帳密輸入錯誤';
+    fi
+   
     fi
 	
 else
@@ -272,13 +287,6 @@ else
 	exit 2
 fi
 
-
-    trap 'snake_exit;' SIGTERM SIGINT; 
-    stty -echo;                               #取消回顯
-    tput civis;                               #隱藏光標
-    tput smcup; clear;                        #保存螢幕並清除紀錄
-
-    print_game_start;                         #開始遊戲 
 }
 
 game_main;
