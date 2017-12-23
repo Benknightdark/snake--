@@ -262,8 +262,9 @@ if [ $(id -u) -eq 0 ]; then
 	    read -s -p "輸入申請遊戲密碼 : " password
 	    egrep "^$username" /etc/passwd >/dev/null
         if [ $? -eq 0 ]; then
-            echo "$username 此帳號已存在!"
-            exit 1
+            echo "$username 此帳號已存在!"            
+            read -p "輸入申請遊戲帳號 : " username
+	        read -s -p "輸入申請遊戲密碼 : " password
         else
             pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
             useradd -m -p $pass $username
@@ -278,6 +279,8 @@ if [ $(id -u) -eq 0 ]; then
         StartGameMenu
         else
             echo '帳密輸入錯誤';
+            read -p "輸入遊戲登入帳號 : " username
+            read -s -p "輸入遊戲登入密碼 : " password
     fi
    
     fi
